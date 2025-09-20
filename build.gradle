@@ -1,0 +1,58 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.5.4'
+    id 'io.spring.dependency-management' version '1.1.7'
+    id "com.diffplug.spotless" version "6.25.0"
+    id "me.champeau.jmh" version "0.7.2"
+}
+
+group = 'org.csp'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+spotless {
+    java {
+        googleJavaFormat("1.22.0")
+                .reflowLongStrings()
+        removeUnusedImports()
+        formatAnnotations()
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.postgresql:postgresql:42.7.0'
+    implementation 'org.apache.commons:commons-lang3:3.0'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    implementation "com.fasterxml.jackson.core:jackson-databind:2.19.2"
+    runtimeOnly 'com.h2database:h2'
+    implementation 'com.google.guava:guava:33.4.8-jre'
+    implementation 'com.github.haifengl:smile-core:4.4.1'
+    implementation 'org.springframework.boot:spring-boot-starter-validation:3.5.5'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+tasks.named('check') {
+    dependsOn(tasks.named('spotlessCheck'))
+}
+
+jmh {
+    warmupIterations = 5
+    iterations = 10
+    fork = 1
+}
