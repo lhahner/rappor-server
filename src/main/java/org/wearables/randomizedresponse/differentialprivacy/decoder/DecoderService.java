@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
+import org.wearables.randomizedresponse.differentialprivacy.decoder.substance.Substance;
 import org.wearables.randomizedresponse.healthdata.HealthDataEntity;
 
 /**

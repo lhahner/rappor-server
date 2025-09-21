@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
+import org.wearables.randomizedresponse.differentialprivacy.ReportEntity;
+import org.wearables.randomizedresponse.differentialprivacy.decoder.substance.Substance;
 import smile.data.DataFrame;
 import smile.data.formula.Formula;
 import smile.regression.LASSO;
@@ -29,7 +31,7 @@ import smile.validation.metric.MSE;
  */
 @Component
 @Validated
-public class RegressionPipe<T> implements Pipe<T> {
+public class RegressionPipe<T extends ReportEntity> implements Pipe<T> {
   /**
    * Runs the regression step of the pipeline.
    *
