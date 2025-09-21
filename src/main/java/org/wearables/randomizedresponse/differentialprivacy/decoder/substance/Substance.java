@@ -3,10 +3,13 @@
  *
  * @author Lennart Hahner
  */
-package org.wearables.randomizedresponse.differentialprivacy.decoder;
+package org.wearables.randomizedresponse.differentialprivacy.decoder.substance;
 
 import java.util.List;
 import java.util.Map;
+
+import org.mapstruct.Builder;
+import org.wearables.randomizedresponse.differentialprivacy.ReportEntity;
 import org.wearables.randomizedresponse.differentialprivacy.parameter.ParameterEntity;
 
 /**
@@ -17,7 +20,7 @@ import org.wearables.randomizedresponse.differentialprivacy.parameter.ParameterE
  *
  * @param <T> Domain-specific type representing the actual health data entity
  */
-public class Substance<T> {
+public class Substance<T extends ReportEntity> {
 
   /** List of entities being decoded. */
   private List<T> entities;

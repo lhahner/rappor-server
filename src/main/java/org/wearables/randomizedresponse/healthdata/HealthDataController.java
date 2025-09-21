@@ -12,14 +12,18 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.wearables.randomizedresponse.differentialprivacy.Report;
+import org.wearables.randomizedresponse.differentialprivacy.ReportEntity;
 import org.wearables.randomizedresponse.differentialprivacy.decoder.DecoderService;
-import org.wearables.randomizedresponse.differentialprivacy.decoder.Substance;
+import org.wearables.randomizedresponse.differentialprivacy.decoder.substance.Substance;
+import org.wearables.randomizedresponse.differentialprivacy.decoder.substance.SubstanceMapper;
+import org.wearables.randomizedresponse.differentialprivacy.hyperparameter.HyperParameterConfiguration;
 import org.wearables.randomizedresponse.differentialprivacy.parameter.ParameterEntity;
 import org.wearables.randomizedresponse.differentialprivacy.parameter.ParameterService;
 import org.wearables.randomizedresponse.utilities.MappingUtils;
@@ -45,25 +49,23 @@ public class HealthDataController {
   /** Service for retrieving differential privacy parameter profiles. */
   private final ParameterService parameterService;
 
+  private final SubstanceMapper substanceMapper;
+  private final HyperParameterConfiguration hyperParameterConfiguration;
+
   public HealthDataController(
       MappingUtils mappingUtils,
       DecoderService<HealthDataEntity> decoderService,
       ParameterService parameterService,
-      HealthDataService healthDataService) {
+      HealthDataService healthDataService,
+      SubstanceMapper substanceMapper,
+      HyperParameterConfiguration hyperParameterConfiguration) {
     this.mappingUtils = mappingUtils;
     this.decoderService = decoderService;
     this.parameterService = parameterService;
     this.healthDataService = healthDataService;
+    this.substanceMapper = substanceMapper;
+    this.hyperParameterConfiguration = hyperParameterConfiguration;
   }
-
-  /** Step size used when computing value ranges for decoding. */
-  private static final int RANGE_ITERATOR = 100;
-
-  /** Regularization parameters used by the decoding pipeline. */
-  private static final double[] LAMBDAS = new double[] {0.01, 0.05, 0.1, 0.2, 0.4};
-
-  /** Start of the value range for histogram binning during decoding. */
-  private static final int START_RANGE = 0;
 
   /**
    * Uploads health data in JSON format. The request body is deserialized into a Report containing
@@ -185,19 +187,15 @@ public class HealthDataController {
    *
    * @param entities list of health data entities to decode
    * @param parameterEntity differential privacy parameters to apply
-   * @return fully initialized Substance for the decoder service
+* @return fully initialized Substance for the decoder service
    */
   public Substance<HealthDataEntity> getHealthDataSubstance(
-      @NotNull List<HealthDataEntity> entities, @NotNull ParameterEntity parameterEntity) {
-    Substance<HealthDataEntity> substance = new Substance<>();
+          @NotNull List<HealthDataEntity> entities, @NotNull ParameterEntity parameterEntity) {
+    Substance<HealthDataEntity> substance = substanceMapper.convertMulti(parameterEntity, hyperParameterConfiguration);
     substance.setEntities(entities);
-    substance.setParameterEntity(parameterEntity);
-    substance.setMessageBitSize(parameterEntity.getMessageBitSize());
-    substance.setStartRange(START_RANGE);
-    int maxValueRange = decoderService.calculateMaxRangeForStepCountBin(entities, RANGE_ITERATOR);
-    substance.setRangeIterator(RANGE_ITERATOR);
-    substance.setMaxRange(maxValueRange);
-    substance.setLambdas(LAMBDAS);
+    substance.setMaxRange(
+        decoderService.calculateMaxRangeForStepCountBin(
+            entities, hyperParameterConfiguration.getRangeIterator()));
     return substance;
   }
 }

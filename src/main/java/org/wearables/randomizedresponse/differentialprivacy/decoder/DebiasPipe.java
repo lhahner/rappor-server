@@ -18,6 +18,8 @@ import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
+import org.wearables.randomizedresponse.differentialprivacy.ReportEntity;
+import org.wearables.randomizedresponse.differentialprivacy.decoder.substance.Substance;
 import org.wearables.randomizedresponse.differentialprivacy.parameter.ParameterService;
 
 /**
@@ -29,7 +31,7 @@ import org.wearables.randomizedresponse.differentialprivacy.parameter.ParameterS
  */
 @Service
 @Validated
-public class DebiasPipe<T> implements Pipe<T> {
+public class DebiasPipe<T extends ReportEntity> implements Pipe<T> {
   /**
    * Executes the debiasing step of the pipeline.
    *

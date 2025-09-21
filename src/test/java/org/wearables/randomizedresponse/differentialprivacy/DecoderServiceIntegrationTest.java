@@ -17,7 +17,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.wearables.randomizedresponse.TestUtil;
 import org.wearables.randomizedresponse.differentialprivacy.decoder.DecoderService;
-import org.wearables.randomizedresponse.differentialprivacy.decoder.Substance;
+import org.wearables.randomizedresponse.differentialprivacy.decoder.substance.Substance;
 import org.wearables.randomizedresponse.differentialprivacy.parameter.ParameterService;
 import org.wearables.randomizedresponse.healthdata.HealthData;
 import org.wearables.randomizedresponse.healthdata.HealthDataEntity;

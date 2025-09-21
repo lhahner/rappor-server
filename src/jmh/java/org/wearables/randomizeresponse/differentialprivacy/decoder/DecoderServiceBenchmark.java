@@ -7,7 +7,7 @@ import java.util.stream.IntStream;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
 import org.wearables.randomizedresponse.differentialprivacy.decoder.DecoderService;
-import org.wearables.randomizedresponse.differentialprivacy.decoder.Substance;
+import org.wearables.randomizedresponse.differentialprivacy.decoder.substance.Substance;
 import org.wearables.randomizedresponse.differentialprivacy.parameter.ParameterEntity;
 import org.wearables.randomizedresponse.healthdata.HealthDataEntity;
 
