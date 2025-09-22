@@ -34,10 +34,13 @@ public class ParameterController {
 
   private final MappingUtils mappingUtils;
 
+  private final ParameterMapper parameterMapper;
+
   @Autowired
-  public ParameterController(ParameterService parameterService, MappingUtils mappingUtils) {
+  public ParameterController(ParameterService parameterService, MappingUtils mappingUtils, ParameterMapper parameterMapper) {
     this.parameterService = parameterService;
     this.mappingUtils = mappingUtils;
+    this.parameterMapper = parameterMapper;
   }
 
   /**
@@ -87,7 +90,7 @@ public class ParameterController {
     }
     ParameterData parameterData =
         mappingUtils.objectMapper.readValue(parameters, new TypeReference<ParameterData>() {});
-    parameterService.save(parameterService.mapParameterDataToEntity(parameterData));
+    parameterService.save(parameterMapper.convert(parameterData));
     return ResponseEntity.ok().build();
   }
 }
