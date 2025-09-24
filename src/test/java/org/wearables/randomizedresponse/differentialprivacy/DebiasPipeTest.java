@@ -19,17 +19,17 @@ import org.wearables.randomizedresponse.healthdata.HealthDataEntity;
 @Import(DebiasPipe.class)
 class DebiasPipeTest {
 
-  @InjectMocks private DebiasPipe<HealthDataEntity> debiasPipe;
+  @InjectMocks private DebiasPipe<HealthDataEntity> debiasPipe = new DebiasPipe<>();
 
   @InjectMocks private ParameterService parameterService;
 
   @Test
-  void mapCandidateStringsToIndex() {
-    int[] indexes = debiasPipe.mapCandidateStringsToIndex(0, 100, 16, null);
-    int[] diffIndexes = debiasPipe.mapCandidateStringsToIndex(100, 200, 16, null);
+  void mapNumericCandidateStringsToIndex() {
+    int[] indexes = debiasPipe.mapNumericCandidateStringsToIndex(0, 100, 16, null);
+    int[] diffIndexes = debiasPipe.mapNumericCandidateStringsToIndex(100, 200, 16, null);
     assertEquals(2, indexes.length);
     assertFalse(Arrays.equals(indexes, diffIndexes));
-    assertDoesNotThrow(() -> debiasPipe.mapCandidateStringsToIndex(40000, 50000, 16, null));
+    assertDoesNotThrow(() -> debiasPipe.mapNumericCandidateStringsToIndex(40000, 50000, 16, null));
   }
 
   @Test

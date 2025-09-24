@@ -37,7 +37,10 @@ public class ParameterController {
   private final ParameterMapper parameterMapper;
 
   @Autowired
-  public ParameterController(ParameterService parameterService, MappingUtils mappingUtils, ParameterMapper parameterMapper) {
+  public ParameterController(
+      ParameterService parameterService,
+      MappingUtils mappingUtils,
+      ParameterMapper parameterMapper) {
     this.parameterService = parameterService;
     this.mappingUtils = mappingUtils;
     this.parameterMapper = parameterMapper;

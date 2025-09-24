@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 import org.wearables.randomizedresponse.differentialprivacy.ReportEntity;
 import org.wearables.randomizedresponse.differentialprivacy.decoder.substance.Substance;
+import org.wearables.randomizedresponse.differentialprivacy.hyperparameter.HyperParameterConfiguration;
 import org.wearables.randomizedresponse.differentialprivacy.parameter.ParameterService;
 
 /**
@@ -32,6 +33,7 @@ import org.wearables.randomizedresponse.differentialprivacy.parameter.ParameterS
 @Service
 @Validated
 public class DebiasPipe<T extends ReportEntity> implements Pipe<T> {
+
   /**
    * Executes the debiasing step of the pipeline.
    *
@@ -46,7 +48,7 @@ public class DebiasPipe<T extends ReportEntity> implements Pipe<T> {
     Map<String, int[]> binMap = buildBinMap(substance.getMaxRange(), substance.getRangeIterator());
     substance.setBinMap(binMap);
     int[] indexes =
-        mapCandidateStringsToIndex(
+        mapNumericCandidateStringsToIndex(
             substance.getStartRange(),
             substance.getMaxRange(),
             substance.getMessageBitSize(),
@@ -77,14 +79,15 @@ public class DebiasPipe<T extends ReportEntity> implements Pipe<T> {
     do {
       int nextRange = previousRange + rangeIterator;
       String range = Integer.toString(previousRange) + "-" + Integer.toString(nextRange);
-      binMap.put(range, mapCandidateStringsToIndex(previousRange, nextRange, messageBitSize, null));
+      binMap.put(
+          range, mapNumericCandidateStringsToIndex(previousRange, nextRange, messageBitSize, null));
       previousRange = nextRange;
     } while (previousRange < maxRange);
     return binMap;
   }
 
   /**
-   * Maps a candidate range into Bloom filter indexes using hash functions.
+   * Maps a numeric candidate range into Bloom filter indexes using hash functions.
    *
    * <p>By default, Murmur3 hashes with fixed seeds are used unless a custom hash function is
    * provided.
@@ -96,25 +99,73 @@ public class DebiasPipe<T extends ReportEntity> implements Pipe<T> {
    * @return Array of Bloom filter indexes for the given range
    * @throws ArrayIndexOutOfBoundsException If a calculated index exceeds the Bloom filter size
    */
-  public int[] mapCandidateStringsToIndex(
+  public int[] mapNumericCandidateStringsToIndex(
       @PositiveOrZero int startRange,
       @Positive int endRange,
       @Positive int bloomFilterSize,
       HashFunction hashFunction) {
-    int firstHashSeed = 0x12345678;
-    HashFunction firstDefaultHashFunction = Hashing.murmur3_128(firstHashSeed);
-    int secondHashSeed = 0x9ABCDEF0;
-    HashFunction secondDefaultHashfunction = Hashing.murmur3_128(secondHashSeed);
+    HashFunction firstDefaultHashFunction =
+        Hashing.murmur3_128(new HyperParameterConfiguration().getHashSeedFirst());
+    HashFunction secondDefaultHashfunction =
+        Hashing.murmur3_128(new HyperParameterConfiguration().getHashSeedSecond());
     if (hashFunction != null) {
       firstDefaultHashFunction = hashFunction;
       secondDefaultHashfunction = hashFunction;
     }
     String binRange = String.valueOf(startRange) + '-' + endRange;
     byte[] keyBytes = binRange.getBytes(StandardCharsets.UTF_8);
-    int i1 = firstDefaultHashFunction.hashBytes(keyBytes).asInt();
-    int i2 = secondDefaultHashfunction.hashBytes(keyBytes).asInt();
-
     int[] indexes = new int[2];
+    estimateIndexesFromHash(
+        firstDefaultHashFunction.hashBytes(keyBytes).asInt(),
+        secondDefaultHashfunction.hashBytes(keyBytes).asInt(),
+        bloomFilterSize,
+        indexes);
+    Arrays.sort(indexes);
+    return indexes;
+  }
+
+ /**
+  * Maps a candidate range into Bloom filter indexes using hash functions.
+  *
+  * <p>By default, Murmur3 hashes with fixed seeds are used unless a custom hash function is
+  * provided.
+  *
+  * @param value the candidate string
+  * @param bloomFilterSize Size of the Bloom filter bit array
+  * @param hashFunction Optional custom hash function; null to use defaults
+  * @return Array of Bloom filter indexes for the given range
+  * @throws ArrayIndexOutOfBoundsException If a calculated index exceeds the Bloom filter size
+  */
+  public int[] mapCandidateStringsToIndex(
+      @NotNull String value, @Positive int bloomFilterSize, HashFunction hashFunction) {
+    HashFunction firstDefaultHashFunction =
+        Hashing.murmur3_128(new HyperParameterConfiguration().getHashSeedFirst());
+    HashFunction secondDefaultHashfunction =
+        Hashing.murmur3_128(new HyperParameterConfiguration().getHashSeedSecond());
+    if (hashFunction != null) {
+      firstDefaultHashFunction = hashFunction;
+      secondDefaultHashfunction = hashFunction;
+    }
+    byte[] keyBytes = value.getBytes(StandardCharsets.UTF_8);
+    int[] indexes = new int[2];
+    estimateIndexesFromHash(
+        firstDefaultHashFunction.hashBytes(keyBytes).asInt(),
+        secondDefaultHashfunction.hashBytes(keyBytes).asInt(),
+        bloomFilterSize,
+        indexes);
+    Arrays.sort(indexes);
+    return indexes;
+  }
+
+ /**
+  * Estimates Bloom filter indexes from hash values.
+  *
+  * @param i1 first hash value
+  * @param i2 second hash value
+  * @param bloomFilterSize size of Bloom filter
+  * @param indexes output array for indexes
+  */
+  public void estimateIndexesFromHash(int i1, int i2, int bloomFilterSize, int[] indexes) {
     for (int t = 0; t < 2; t++) {
       indexes[t] = Math.floorMod(i1 + t * i2, bloomFilterSize);
       if (indexes[t] > bloomFilterSize) {
@@ -122,7 +173,6 @@ public class DebiasPipe<T extends ReportEntity> implements Pipe<T> {
       }
     }
     Arrays.sort(indexes);
-    return indexes;
   }
 
   /**

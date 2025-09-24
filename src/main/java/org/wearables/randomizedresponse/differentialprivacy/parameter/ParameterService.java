@@ -7,7 +7,6 @@ package org.wearables.randomizedresponse.differentialprivacy.parameter;
 
 import jakarta.validation.constraints.NotNull;
 import java.util.Optional;
-import org.hibernate.MappingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -81,6 +80,6 @@ public class ParameterService {
    * @param parameterEntity The parameter entity to persist
    */
   public void save(@NotNull ParameterEntity parameterEntity) {
-      parameterRepository.save(parameterEntity);
+    parameterRepository.save(parameterEntity);
   }
 }
