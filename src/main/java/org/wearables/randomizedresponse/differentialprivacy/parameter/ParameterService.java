@@ -9,6 +9,8 @@ import jakarta.validation.constraints.NotNull;
 import java.util.Optional;
 import org.hibernate.MappingException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 /**
@@ -51,6 +53,7 @@ public class ParameterService {
    *
    * @return Default parameter entity
    */
+  @Cacheable("parameters")
   public ParameterEntity getDefaultParameterEntity() {
     return new ParameterEntity(
         MESSAGE_BIT_SIZE,
@@ -61,31 +64,13 @@ public class ParameterService {
   }
 
   /**
-   * Maps a ParameterData record into a ParameterEntity. The parameterData is primary used to parse
-   * the JSON into the class.
-   *
-   * @param parameterData Data transfer object containing parameter values
-   * @return A corresponding parameter entity
-   */
-  public ParameterEntity mapParameterDataToEntity(@NotNull ParameterData parameterData)
-      throws MappingException {
-    return new ParameterEntity(
-        parameterData.parameterId(),
-        parameterData.profileName(),
-        parameterData.kValue(),
-        parameterData.hValue(),
-        parameterData.fValue(),
-        parameterData.pValue(),
-        parameterData.qValue());
-  }
-
-  /**
    * Finds a parameter entity by its profile name. A profile is a user defined name for the number
    * of parameters used.
    *
    * @param profile The profile name to look up
    * @return Optional containing the parameter entity if found, otherwise empty
    */
+  @CachePut("parameters")
   public Optional<ParameterEntity> findParameterEntityByProfile(@NotNull String profile) {
     return parameterRepository.findByProfile(profile);
   }
@@ -94,10 +79,8 @@ public class ParameterService {
    * Saves a parameter entity.
    *
    * @param parameterEntity The parameter entity to persist
-   * @return The saved parameter entity
-   * @throws IllegalArgumentException if the provided entity is null
    */
-  public ParameterEntity save(@NotNull ParameterEntity parameterEntity) {
-    return parameterRepository.save(parameterEntity);
+  public void save(@NotNull ParameterEntity parameterEntity) {
+      parameterRepository.save(parameterEntity);
   }
 }

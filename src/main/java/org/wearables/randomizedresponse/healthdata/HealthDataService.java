@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -49,6 +50,7 @@ public class HealthDataService {
    * @return Matching health data entity
    * @throws NoSuchElementException if no entity is found
    */
+  @Cacheable("healthdata")
   public HealthDataEntity findHealthDataById(@NotNull UUID id) {
     return healthDataRepository
         .findById(id)
@@ -175,6 +177,7 @@ public class HealthDataService {
    * @return List of entities from the requested page
    * @throws NoSuchElementException if no entities are found
    */
+  @Cacheable("healthdataEntities")
   public List<HealthDataEntity> getPageOfCohorts(
       @NotNull UUID cohort, @PositiveOrZero int pageRequestMin, @Positive int pageRequestMax) {
     PageRequest pageRequest = PageRequest.of(pageRequestMin, pageRequestMax);
