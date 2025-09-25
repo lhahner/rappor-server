@@ -16,6 +16,10 @@ public class HyperParameterConfiguration {
 
   @NotBlank private int startRange;
 
+  @NotBlank private int hashSeedFirst;
+
+  @NotBlank private int hashSeedSecond;
+
   public int getStartRange() {
     return startRange;
   }
@@ -38,5 +42,21 @@ public class HyperParameterConfiguration {
 
   public void setRangeIterator(int rangeIterator) {
     this.rangeIterator = rangeIterator;
+  }
+
+  public int getHashSeedFirst() {
+    return hashSeedFirst;
+  }
+
+  public void setHashSeedFirst(int hashSeedFirst) {
+    this.hashSeedFirst = hashSeedFirst;
+  }
+
+  public int getHashSeedSecond() {
+    return hashSeedSecond;
+  }
+
+  public void setHashSeedSecond(int hashSeedSecond) {
+    this.hashSeedSecond = hashSeedSecond;
   }
 }

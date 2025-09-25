@@ -7,8 +7,6 @@ package org.wearables.randomizedresponse.differentialprivacy.decoder.substance;
 
 import java.util.List;
 import java.util.Map;
-
-import org.mapstruct.Builder;
 import org.wearables.randomizedresponse.differentialprivacy.ReportEntity;
 import org.wearables.randomizedresponse.differentialprivacy.parameter.ParameterEntity;
 

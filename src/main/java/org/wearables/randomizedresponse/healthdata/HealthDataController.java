@@ -12,14 +12,12 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.wearables.randomizedresponse.differentialprivacy.Report;
-import org.wearables.randomizedresponse.differentialprivacy.ReportEntity;
 import org.wearables.randomizedresponse.differentialprivacy.decoder.DecoderService;
 import org.wearables.randomizedresponse.differentialprivacy.decoder.substance.Substance;
 import org.wearables.randomizedresponse.differentialprivacy.decoder.substance.SubstanceMapper;
@@ -187,11 +185,12 @@ public class HealthDataController {
    *
    * @param entities list of health data entities to decode
    * @param parameterEntity differential privacy parameters to apply
-* @return fully initialized Substance for the decoder service
+   * @return fully initialized Substance for the decoder service
    */
   public Substance<HealthDataEntity> getHealthDataSubstance(
-          @NotNull List<HealthDataEntity> entities, @NotNull ParameterEntity parameterEntity) {
-    Substance<HealthDataEntity> substance = substanceMapper.convertMulti(parameterEntity, hyperParameterConfiguration);
+      @NotNull List<HealthDataEntity> entities, @NotNull ParameterEntity parameterEntity) {
+    Substance<HealthDataEntity> substance =
+        substanceMapper.convertMulti(parameterEntity, hyperParameterConfiguration);
     substance.setEntities(entities);
     substance.setMaxRange(
         decoderService.calculateMaxRangeForStepCountBin(
